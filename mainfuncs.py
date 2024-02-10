@@ -135,3 +135,25 @@ def deladmin(update:Update, context:CallbackContext):
             bot.sendMessage(chat_id,'☑️')
         except:
             bot.sendMessage(chat_id,'Qandaydir xatolik')
+
+def addobuna(update:Update, context:CallbackContext):
+    cnt = sqlite3.connect('data.db')
+    cr = cnt.cursor()
+    bot=context.bot
+    chat_id = update.message.chat_id
+    command = f"""
+        SELECT * FROM Admins WHERE chat_id = "{chat_id}"
+    """
+    admin = cr.execute(command).fetchall()
+    if admin:
+        channel = update.message.text[6:]
+        try:
+            a = bot.get_chat_member(channel,chat_id)['status']
+            command = f"""
+                UPDATE Users SET chat_id = "{channel}" WHERE id=1
+            """
+            cr.execute(command)
+            cnt.commit()
+            bot.sendMessage(chat_id,'✅')
+        except:
+            bot.sendMessage(chat_id,'Qandaydir xatolik')
