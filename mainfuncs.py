@@ -116,5 +116,22 @@ def addadmin(update:Update, context:CallbackContext):
         cr.execute(command)
         cnt.commit()
         bot.send_message(chat_id,'✅')
-        
 
+
+def deladmin(update:Update, context:CallbackContext):
+    cnt = sqlite3.connect('data.db')
+    cr = cnt.cursor()
+    bot=context.bot
+    chat_id = update.message.chat_id
+    command = f"""
+        SELECT * FROM Admins WHERE chat_id = "{chat_id}"
+    """
+    admin = cr.execute(command).fetchall()
+    if admin:
+        user_id = update.message.text[6:]
+        try:
+            a=cr.execute(f'DELETE FROM Admins WHERE chat_id = "{user_id}"').fetchall()
+            cnt.commit()
+            bot.sendMessage(chat_id,'☑️')
+        except:
+            bot.sendMessage(chat_id,'Qandaydir xatolik')
