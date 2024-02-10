@@ -90,14 +90,13 @@ def adminstng(update:Update, context:CallbackContext):
         bot.sendMessage(chat_id,text)
     elif b == 'stng':
         text = "Yangi admin qo'shish uchun\n```admin+user_id```\n\nAdmin o'chirish uchun\n```admin-user_id```"
-        bot.sendMessage(chat_id,text)
+        bot.sendMessage(chat_id,text,parse_mode=ParseMode.MARKDOWN)
     elif b == 'obuna':
         text = "Majburiy obuna qo'shish uchun avval botni kanal(guruh)ga to'liq admin qilasiz va quyidagicha ulaysiz:\n```obuna+@username```"
-        text+="Majburiy obunani alishtirish:\n```obuna-@username```"
-        bot.sendMessage(chat_id,text)
+        bot.sendMessage(chat_id,text,parse_mode=ParseMode.MARKDOWN)
     else:
-        text = "Foydalanuvchilarga xabar jo'natish uchun istalgan **forward**li xabar yuboring"
-        bot.sendMessage(chat_id,text)
+        text = "Foydalanuvchilarga xabar jo'natish uchun istalgan *forward*li xabar yuboring"
+        bot.sendMessage(chat_id,text,parse_mode=ParseMode.MARKDOWN)
 
 def addadmin(update:Update, context:CallbackContext):
     cnt = sqlite3.connect('data.db')
@@ -157,3 +156,26 @@ def addobuna(update:Update, context:CallbackContext):
             bot.sendMessage(chat_id,'✅')
         except:
             bot.sendMessage(chat_id,'Qandaydir xatolik')
+
+def test(update:Update, context:CallbackContext):
+    query = update.callback_query
+    chat_id = query.message.chat_id
+    msg = query.message.message_id
+    bot=context.bot
+    b = query.data.split(' ')[1]
+    cnt = sqlite3.connect('data.db')
+    cr = cnt.cursor()
+    if b=='+':
+        text = """
+        👇👇👇 Yo'riqnoma.
+
+        1️⃣ Test yaratish uchun
+
+        +test*Fan nomi*to'g'ri javoblar 
+
+        ko`rinishida yuboring.
+
+        Misol:
+        +test*Informatika*abbccdd... 
+        """
+        bot.send_message(chat_id,text)
