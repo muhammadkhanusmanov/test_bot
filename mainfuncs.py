@@ -179,3 +179,17 @@ def test(update:Update, context:CallbackContext):
         +test*Informatika*abbccdd... 
         """
         bot.send_message(chat_id,text)
+    else:
+        text = """
+        👇👇👇 Yo'riqnoma.
+
+        1️⃣ Test javoblarini yuborish uchun 
+
+        test kodi*abbccdd... 
+
+        kabi ko`rinishlarda yuboring.
+
+        Misol: 
+        1234*abbccdd... 
+        """
+        bot.send_message(chat_id,text)
