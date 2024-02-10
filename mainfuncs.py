@@ -73,4 +73,48 @@ def userfun(update:Update, context:CallbackContext):
     else:
         bot.sendMessage(chat_id,'Obuna bo\'lishda xatolik!')
 
+def adminstng(update:Update, context:CallbackContext):
+    query = update.callback_query
+    chat_id = query.message.chat_id
+    msg = query.message.message_id
+    bot=context.bot
+    b = query.data.split(' ')[1]
+    cnt = sqlite3.connect('data.db')
+    cr = cnt.cursor()
+    if b == 'stc':
+        command = """
+        SELECT COUNT(id) FROM Users;
+        """
+        res = cr.execute(command).fetchone()[0]
+        text = f"Botdagi foydalanuvchilar umumiy soni: {res}"
+        bot.sendMessage(chat_id,text)
+    elif b == 'stng':
+        text = "Yangi admin qo'shish uchun\n```admin+user_id```\n\nAdmin o'chirish uchun\n```admin-user_id```"
+        bot.sendMessage(chat_id,text)
+    elif b == 'obuna':
+        text = "Majburiy obuna qo'shish uchun avval botni kanal(guruh)ga to'liq admin qilasiz va quyidagicha ulaysiz:\n```obuna+@username```"
+        text+="Majburiy obunani alishtirish:\n```obuna-@username```"
+        bot.sendMessage(chat_id,text)
+    else:
+        text = "Foydalanuvchilarga xabar jo'natish uchun istalgan **forward**li xabar yuboring"
+        bot.sendMessage(chat_id,text)
+
+def addadmin(update:Update, context:CallbackContext):
+    cnt = sqlite3.connect('data.db')
+    cr = cnt.cursor()
+    bot=context.bot
+    chat_id = update.message.chat_id
+    command = f"""
+        SELECT * FROM Admins WHERE chat_id = "{chat_id}"
+    """
+    admin = cr.execute(command).fetchall()
+    if admin:
+        user_id = update.message.text[6:]
+        command = f"""
+        INSERT INTO Admins (chat_id) VALUES ("{user_id}")
+        """
+        cr.execute(command)
+        cnt.commit()
+        bot.send_message(chat_id,'✅')
+        
 
