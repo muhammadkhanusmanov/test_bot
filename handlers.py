@@ -1,6 +1,6 @@
 from telegram.ext import Updater,CommandHandler,CallbackContext,MessageHandler,Filters,CallbackQueryHandler,ConversationHandler
 from mainfuncs import (
-    start,userfun,check,adminstng
+    start,userfun,check,adminstng,addadmin
 )
 
 
@@ -10,7 +10,7 @@ dp = updater.dispatcher
 dp.add_handler(CommandHandler('start',start))
 dp.add_handler(CallbackQueryHandler(userfun,pattern='user'))
 dp.add_handler(CallbackQueryHandler(adminstng,pattern='admin'))
-
+dp.add_handler(MessageHandler(Filters.regex(r'^admin\+'),addadmin))
 
 updater.start_polling()
 updater.idle()
