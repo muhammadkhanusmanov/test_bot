@@ -3,6 +3,9 @@ from telegram import (
     Bot,Update,ReplyKeyboardMarkup,KeyboardButton,InlineKeyboardMarkup,
     InlineKeyboardButton,ChatAdministratorRights,ParseMode, MenuButtonWebApp,WebAppInfo,InputFile
     )
+from datetime import datetime
+import pytz
+
 import sqlite3
 
 bot = Bot('5655855014:AAFgMvIpeQ4CSn9N-q547jvM5YL286vfrT4')
@@ -187,7 +190,7 @@ def test(update:Update, context:CallbackContext):
 
         1️⃣ Test javoblarini yuborish uchun 
 
-        test kodi*abbccdd... 
+        test kodi*ism*abbccdd... 
 
         kabi ko`rinishlarda yuboring.
 
@@ -226,16 +229,86 @@ def addtest(update:Update, context:CallbackContext):
         text = f"""
         ✅Test bazaga qo`shildi.
 
-        Test kodi: {cr.lastrowid}
+        Test kodi: @{cr.lastrowid}
         Savollar soni: {len(b)} ta
 
 Testda qatnashuvchilar quyidagi ko`rinishda javob yuborishlari mumkin:
 
-        {cr.lastrowid}*abcde... 
+        @{cr.lastrowid}*abcde... 
         """
         cnt.commit()
         btn1 = InlineKeyboardButton('Joriy holat',callback_data='answer 1')
         btn2 = InlineKeyboardButton('Yakunlash',callback_data='answer 2')
         btn = InlineKeyboardMarkup([[btn1,btn2]])
         bot.send_message(chat_id,text,reply_markup=btn)
+
+
+def check_answer(update:Update, context:CallbackContext):
+    cnt = sqlite3.connect('data.db')
+    cr = cnt.cursor()
+    bot=context.bot
+    chat_id = update.message.chat_id
+    command = f"""
+     SELECT chat_id FROM Users WHERE id = {1}
+    """
+    channel = cr.execute(command).fetchone()[0]
+    a = check(chat_id,bot,channel)
+    command = f"""
+        SELECT * FROM Admins WHERE chat_id = "{chat_id}"
+    """
+    admin = cr.execute(command).fetchall()
+    cnt.commit()
+    if (a or admin):
+        cnt = sqlite3.connect('test.db')
+        cr = cnt.cursor()
+        data = update.message.text
+        a,b,c = data[1:].split('*')
+        command = f"""
+        SELECT * FROM Tests WHERE id={a}
+        """
+        ch = cr.execute(command).fetchall()
+        if ch:
+            l = len(ch[0][-1])
+            if l != len(c):
+                bot.send_message(chat_id,f'Savollar soni {l} ta, javoblar bilan mutonosibmas!')
+                return 0
+            if len(b)>35:
+                bot.sendMessage(chat_id,'Ism familya uchun matn uzun!')
+                return 0
+            command = f"""
+            SELECT * FROM Answers WHERE id={a} AND chat_id="{chat_id}"
+            """
+            ch1 = cr.execute(command).fetchall()
+            if ch1:
+                bot.sendMessage(chat_id,'❗️❗️❗️Siz oldinroq bu testga javob yuborgansiz.\n\nBitta testga faqat bir marta javob yuborish mumkin!')
+                return 0
+            k=0
+            for i,j in zip(c,ch[0][-1]):
+                if i == j:
+                    k+=1
+            command = f"""
+            INSERT INTO Answers VALUES ({a},"{b}","{chat_id}",{k},"a")
+            """
+            cr.execute(command)
+            cnt.commit()
+            hozirgi_vaqt = datetime.now()
+
+
+            toshkent_vaqti = pytz.timezone('Asia/Tashkent')
+            hozirgi_vaqt_toshkent = hozirgi_vaqt.astimezone(toshkent_vaqti)
+            text = f"""
+👤 Foydalanuvchi: 
+{b}
+
+📚 Fan: {ch[0][3]}
+📖 Test kodi: {a}
+✏️ Jami savollar soni: {l} ta
+✅ To'g'ri javoblar soni: {k} ta
+🔣 Foiz : {(k/l)*100} %
+
+--------------------------------
+🕐 Sana, vaqt: {hozirgi_vaqt_toshkent.strftime("%Y-%m-%d %H:%M:%S")}
+
+            """
+            bot.send_message(chat_id,text)
 
