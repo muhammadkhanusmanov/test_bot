@@ -22,7 +22,9 @@ def start(update:Update, context:CallbackContext):
         btn2 = InlineKeyboardButton('Admin⚙️',callback_data='admin stng')
         btn3 = InlineKeyboardButton('Majburiy obuna',callback_data='admin obuna')
         btn4 = InlineKeyboardButton('Xabar yuborish',callback_data='admin msg')
-        btn = InlineKeyboardMarkup([[btn2,btn1], [btn3,btn4]])
+        btn6 = InlineKeyboardButton("Test yaratish",callback_data='test +')
+        btn7 = InlineKeyboardButton("Test yechish",callback_data='test tek')
+        btn = InlineKeyboardMarkup([[btn2,btn1], [btn3,btn4],[btn6,btn7]])
     else:
         command = f"""
         SELECT * FROM Users WHERE chat_id = "{chat_id}"
@@ -171,12 +173,12 @@ def test(update:Update, context:CallbackContext):
 
         1️⃣ Test yaratish uchun
 
-        +test*Fan nomi*to'g'ri javoblar 
+        +test*ism*Fan nomi*to'g'ri javoblar 
 
         ko`rinishida yuboring.
 
         Misol:
-        +test*Informatika*abbccdd... 
+        +test*Alibek*Informatika*abbccdd... 
         """
         bot.send_message(chat_id,text)
     else:
@@ -190,6 +192,50 @@ def test(update:Update, context:CallbackContext):
         kabi ko`rinishlarda yuboring.
 
         Misol: 
-        1234*abbccdd... 
+        1234*ism*abbccdd... 
         """
         bot.send_message(chat_id,text)
+
+def addtest(update:Update, context:CallbackContext):
+    cnt = sqlite3.connect('data.db')
+    cr = cnt.cursor()
+    bot=context.bot
+    chat_id = update.message.chat_id
+    data = update.message.text
+    command = f"""
+     SELECT chat_id FROM Users WHERE id = {1}
+    """
+    channel = cr.execute(command).fetchone()[0]
+    a = check(chat_id,bot,channel)
+    command = f"""
+        SELECT * FROM Admins WHERE chat_id = "{chat_id}"
+    """
+    admin = cr.execute(command).fetchall()
+    cnt.commit()
+    if (a or admin):
+        a1,a,b=data[5:].split('*')
+        if len(a1)>35:
+            bot.sendMessage(chat_id,'Ism familya uchun matn uzun')
+            return 0
+        cnt = sqlite3.connect('test.db')
+        cr = cnt.cursor()
+        command = f"""
+        INSERT INTO Tests (name,chat_id,subject,test) VALUES ("{a1}","{chat_id}","{a}","{b}")
+        """
+        cr.execute(command)
+        text = f"""
+        ✅Test bazaga qo`shildi.
+
+        Test kodi: {cr.lastrowid}
+        Savollar soni: {len(b)} ta
+
+Testda qatnashuvchilar quyidagi ko`rinishda javob yuborishlari mumkin:
+
+        {cr.lastrowid}*abcde... 
+        """
+        cnt.commit()
+        btn1 = InlineKeyboardButton('Joriy holat',callback_data='answer 1')
+        btn2 = InlineKeyboardButton('Yakunlash',callback_data='answer 2')
+        btn = InlineKeyboardMarkup([[btn1,btn2]])
+        bot.send_message(chat_id,text,reply_markup=btn)
+
